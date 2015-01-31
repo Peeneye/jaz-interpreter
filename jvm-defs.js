@@ -8,8 +8,7 @@ module.exports = {
         val = this.program.var(val) || val;
 
         if (this.state === 'sub-start') {
-            this.callParams[ptr] = val;
-            console.log(this.callParams);
+            this.program.param(ptr, val);
         } else {
             this.program.var(ptr, val);
         }
@@ -25,8 +24,10 @@ module.exports = {
 
     rvalue: function (ptr) {
         var val = this.program.var(ptr);
-        if (val === null) {
-            val = ptr;
+        if (val === null || typeof(val) === 'undefined') {
+            if (this.program.retVar(ptr)) {
+                val = this.program.retVar(ptr);
+            }
         }
         this.push(val);
     },
@@ -159,46 +160,29 @@ module.exports = {
 
     call: function (lbl) {
         var start = this.program.label(lbl),
-            params = JSON.parse(JSON.stringify(this.callParams)),
+            params = this.program.getParams(),
             newContext = {
                 pc: start,
                 vars: params
             },
             currContext = this.program.getContext();
-        
-        console.log("PUSHING CONTEXT:");
-        console.log(currContext);
-        console.log("SETTING CONTEXT:");
-        console.log(newContext);
 
         this.pushFrame(currContext);
         this.program.setContext(newContext);
         this.state = 'sub-call';
-        this.callParams = {};
+        this.program.clearParams();
     },
 
     return : function () {
-        var savedContext = this.popFrame(),
-            currentContext = this.program.getContext();
+        var savedContext = this.popFrame();
 
-        console.log("SAVED CONTEXT:");
-        console.log(savedContext);
-        console.log("CURRENT CONTEXT:");
-        console.log(currentContext);
-
-        for (var v in currentContext.vars) {
-            if (!savedContext.vars[v]) {
-                savedContext.vars[v] = currentContext.vars[v];
-            }
-        }
-
-        console.log("SAVED CONTEXT AFTER MESHING:");
-        console.log(savedContext);
+        this.program.setReturn(this.program.getContext().vars);
 
         this.program.setContext(savedContext);
     },
 
     end: function () {
+        this.program.clearReturn();
         this.state = 'normal';
     }
 };

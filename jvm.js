@@ -3,7 +3,6 @@ var JVM = function (instructions) {
     this.program = null
     this.defs = require('./jvm-defs');
     this.state = 'normal';
-    this.callParams = {};
     
     var stack = [],
         frames = [];
@@ -37,8 +36,6 @@ JVM.prototype.init = function (instructions) {
         }
     });
     
-    
-    //Splice them out so index points at instruction after label
     for (var lbl in labels) {
         var idx = labels[lbl] + offset;
         instructions.splice(idx, 1);

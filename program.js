@@ -6,7 +6,9 @@ var Program = function (instrs, labels) {
         context = {
             vars: {},
             pc: 0
-        };
+        },
+        callParams = {},
+        ret = {};
 
     this.fetch = function () {
         if (context.pc < size) {
@@ -19,12 +21,8 @@ var Program = function (instrs, labels) {
 
     this.var = function (k, v) {
         if (typeof (v) !== 'undefined') {
-            //console.log("Setting var " + k + " to val " + v);
             context.vars[k] = v;
         } else {
-            if (isNaN(k)) {
-            //console.log("Trying to get var " + k + " whose val is " + context.vars[k]);
-        }
             return context.vars[k] !== null ? context.vars[k] : null;
         }
     };
@@ -37,13 +35,37 @@ var Program = function (instrs, labels) {
         }
     };
     
+    this.param = function (k, v) {
+        callParams[k] = v;
+    };
+    
+    this.getParams = function () {
+        return JSON.parse(JSON.stringify(callParams));
+    };
+    
+    this.clearParams = function () {
+        callParams = {};
+    };
+    
+    this.retVar = function (k) {
+        return ret[k];
+    };
+    
+    this.setReturn = function (retCtx) {
+        ret = retCtx;
+    };
+    
+    this.clearReturn = function () {
+        ret = {};
+    };
+    
     this.jump = function (lbl) {
         context.pc = labels[lbl];
     };
     
     this.getContext = function () {
         return context;
-    }
+    };
     
     this.setContext = function (c) {
         context = c;
