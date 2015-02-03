@@ -1,6 +1,5 @@
 var Program = require('./program');
 module.exports = {
-
     ":=": function () {
         var val = this.pop(),
             ptr = this.pop();
@@ -24,9 +23,12 @@ module.exports = {
 
     rvalue: function (ptr) {
         var val = this.program.var(ptr);
-        if (val === null || typeof(val) === 'undefined') {
+        if (typeof(val) === 'undefined') {
             if (this.program.retVar(ptr)) {
                 val = this.program.retVar(ptr);
+            } else {
+                val = 0;
+                this.program.var(ptr, 0);
             }
         }
         this.push(val);
@@ -77,11 +79,17 @@ module.exports = {
     },
 
     "/": function () {
-        this.push(0 | (this.pop() / this.pop()));
+        var o2 = this.pop(),
+            o1 = this.pop();
+        
+        this.push(0|(o1 / o2));
     },
 
     div: function () {
-        this.push(this.pop() % this.pop());
+        var o2 = this.pop(),
+            o1 = this.pop();
+        
+        this.push(o1 % o2);
     },
 
     "&": function () {
@@ -89,7 +97,7 @@ module.exports = {
     },
 
     "!": function () {
-        this.push(~this.pop());
+        this.push(!this.pop() ? 1 : 0);
     },
 
     "|": function () {
@@ -175,9 +183,7 @@ module.exports = {
 
     return : function () {
         var savedContext = this.popFrame();
-
         this.program.setReturn(this.program.getContext().vars);
-
         this.program.setContext(savedContext);
     },
 
