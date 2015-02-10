@@ -3,11 +3,10 @@ var ProgramContext = require('./program-context');
 var Program = function (instrs, labels) {
     var labels = labels ? new SymbolTable(labels) : new SymbolTable(),
         instructions = instrs,
-        pc = 0,
         size = instrs.length,
         context = {
-            vars: new SymbolTable(),
-            pc: 0
+            pc: 0,
+            vars: new SymbolTable()
         },
         callParams = new SymbolTable(),
         ret = new SymbolTable();
