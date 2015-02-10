@@ -1,15 +1,16 @@
 var SymbolTable = require('./symbol-table');
+var ProgramContext = require('./program-context');
 var Program = function (instrs, labels) {
-    var labels = labels || {},
+    var labels = labels ? new SymbolTable(labels) : new SymbolTable(),
         instructions = instrs,
         pc = 0,
         size = instrs.length,
         context = {
-            vars: {},
+            vars: new SymbolTable(),
             pc: 0
         },
-        callParams = {},
-        ret = {};
+        callParams = new SymbolTable(),
+        ret = new SymbolTable();
 
     this.fetch = function () {
         if (context.pc < size) {
@@ -21,47 +22,35 @@ var Program = function (instrs, labels) {
     };
 
     this.var = function (k, v) {
-        if (typeof (v) !== 'undefined') {
-            context.vars[k] = v;
-        } else {
-            return context.vars[k] !== null ? context.vars[k] : null;
-        }
+        return context.vars.sym(k, v);
     };
 
-    this.label = function (lbl, idx) {
-        if (idx) {
-            labels[lbl] = idx;
-        } else {
-            return labels[lbl];
-        }
+    this.label = function (k, v) {
+        return labels.sym(k, v);
     };
     
     this.param = function (k, v) {
-        callParams[k] = v;
+        return callParams.sym(k, v);
     };
     
     this.getParams = function () {
-        return JSON.parse(JSON.stringify(callParams));
-    };
+        return callParams.getTable();
+    }
     
     this.clearParams = function () {
-        callParams = {};
+        callParams = new SymbolTable();
     };
     
     this.retVar = function (k) {
-        return ret[k];
+        return ret.sym(k);
     };
     
-    this.setReturn = function (retCtx) {
-        ret = retCtx;
-    };
-    
-    this.clearReturn = function () {
-        ret = {};
-    };
+    this.setReturn = this.clearReturn = function (returnContext) {
+        ret.setTable(returnContext);
+    }
     
     this.jump = function (lbl) {
-        context.pc = labels[lbl];
+        context.pc = labels.sym(lbl);
     };
     
     this.getContext = function () {

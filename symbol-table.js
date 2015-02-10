@@ -1,5 +1,5 @@
-var SymbolTable = function () {
-    var table = {};
+var SymbolTable = function (t) {
+    var table = t || {};
     
     this.sym = function (k, v) {
         if (typeof (v) !== 'undefined') {
@@ -7,6 +7,14 @@ var SymbolTable = function () {
         } else {
             return table[k] !== null ? table[k] : null;
         }
+    };
+    
+    this.getTable = function () {
+        return JSON.parse(JSON.stringify(table));
+    };
+    
+    this.setTable = function (t) {
+        table = t || {};
     };
 };
 

@@ -1,3 +1,5 @@
+var ProgramContext = require('./program-context');
+var SymbolTable = require('./symbol-table');
 module.exports = {
     ":=": function () {
         var val = this.pop(),
@@ -170,7 +172,7 @@ module.exports = {
             params = this.program.getParams(),
             newContext = {
                 pc: start,
-                vars: params
+                vars: new SymbolTable(params)
             },
             currContext = this.program.getContext();
 
@@ -182,7 +184,7 @@ module.exports = {
 
     return : function () {
         var savedContext = this.popFrame();
-        this.program.setReturn(this.program.getContext().vars);
+        this.program.setReturn(this.program.getContext().vars.getTable());
         this.program.setContext(savedContext);
     },
 
