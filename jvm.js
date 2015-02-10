@@ -1,63 +1,26 @@
 var Program = require('./program');
+var JVMEngine = require('./jvm-engine');
 var JVM = function (instructions) {
-    this.program = null
-    this.defs = require('./jvm-defs');
-    this.state = 'normal';
-    
-    var stack = [],
-        frames = [];
-    
-    this.push = function (val) {
-        stack.push(val);
-    };
-    this.pop = function () {
-        return stack.pop();
-    };
-    this.pushFrame = function (f) {
-        frames.push(f);
-    };
-    this.popFrame = function () {
-        return frames.pop();
-    };
+    this.engine = null;
     
     this.init(instructions);
 };
 
 JVM.prototype.init = function (instructions) {
     //Need to find labels before we run the program
-    var labels = {
-    },
-        offset = 0;
+    var labeler = require('./labeler'),
+        labels = labeler.getLabels(instructions);
     
-    instructions.forEach(function (instr, idx) { 
-        if (instr.indexOf('label') !== -1) {
-            var lbl = instr.trim().split(' ')[1];
-            labels[lbl] = idx;
-        }
-    });
-    
-    for (var lbl in labels) {
-        var idx = labels[lbl] + offset;
-        instructions.splice(idx, 1);
-        labels[lbl] = idx;
-        offset--;
-    }
-    
-    labels.main = 0;
-    
-    this.program = new Program(instructions, labels);
+    var program = new Program(instructions, labels);
+    this.engine = new JVMEngine(program);
 };
 
-JVM.prototype.run = function () {
-    var instr = this.program.fetch();
-    while (instr !== -1 && this.state !== 'halted') {
-        var params = this.decode(instr);
-        this.execute(params);
-        instr = this.program.fetch();
-    }
+JVM.prototype.run = function (doneCallback) {
+    this.engine.run();
+    doneCallback();
 };
 
-JVM.prototype.decode = function (instr) {
+/*JVM.prototype.decode = function (instr) {
     instr = instr.trim();
     var splitIdx = instr.indexOf(" "),
         split = splitIdx === -1 ? [ instr, null ] : [ instr.slice(0, splitIdx), instr.slice(splitIdx).trim() ];
@@ -78,6 +41,6 @@ JVM.prototype.execute = function (params) {
     //console.log("Executings " + lhs + " with param: " + rhs);
     
     this.defs[lhs].call(this, rhs);
-};
+};*/
 
 module.exports = JVM;

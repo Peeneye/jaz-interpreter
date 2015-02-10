@@ -1,3 +1,4 @@
+var SymbolTable = require('./symbol-table');
 var Program = function (instrs, labels) {
     var labels = labels || {},
         instructions = instrs,

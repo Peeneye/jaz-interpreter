@@ -1,4 +1,3 @@
-var Program = require('./program');
 module.exports = {
     ":=": function () {
         var val = this.pop(),
@@ -159,7 +158,7 @@ module.exports = {
     },
 
     show: function (output) {
-        console.log(output || "\n");
+        console.log(output === null ? "\n" : output);
     },
 
     begin: function () {
