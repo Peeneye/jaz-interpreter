@@ -1,13 +1,13 @@
 var ProgramContext = require('./program-context');
-var SymbolTable = require('./symbol-table');
-module.exports = {
+var JVMStates = require('./jvm-states');
+var JVMDefs = {
     ":=": function () {
         var val = this.pop(),
             ptr = this.pop();
 
         val = this.program.var(val) || val;
 
-        if (this.state === 'sub-start') {
+        if (this.getState() === JVMStates.SUB_START) {
             this.program.param(ptr, val);
         } else {
             this.program.var(ptr, val);
@@ -62,7 +62,7 @@ module.exports = {
     },
 
     halt: function () {
-        this.state = 'halted';
+        this.setState(JVMStates.HALTED);
     },
 
     "+": function () {
@@ -164,32 +164,42 @@ module.exports = {
     },
 
     begin: function () {
-        this.state = 'sub-start';
+        this.setState(JVMStates.SUB_START);
     },
 
     call: function (lbl) {
         var start = this.program.label(lbl),
             params = this.program.getParams(),
-            newContext = {
-                pc: start,
-                vars: new SymbolTable(params)
-            },
+            newContext = new ProgramContext(start, params),
             currContext = this.program.getContext();
 
         this.pushFrame(currContext);
         this.program.setContext(newContext);
-        this.state = 'sub-call';
+        this.setState(JVMStates.SUB_CALL);
         this.program.clearParams();
     },
 
     return : function () {
         var savedContext = this.popFrame();
-        this.program.setReturn(this.program.getContext().vars.getTable());
+        this.program.setReturn(this.program.getContext().getVars());
         this.program.setContext(savedContext);
     },
 
     end: function () {
         this.program.clearReturn();
-        this.state = 'normal';
+        this.setState(JVMStates.NORMAL);
     }
 };
+
+var JVMDefsFactory = {
+    loadDefinitions: function (engineContext) {
+        var retDefs = {};
+        for (var def in JVMDefs) {
+            retDefs[def] = JVMDefs[def].bind(engineContext);
+        }
+        
+        return retDefs;
+    }
+};
+
+module.exports = JVMDefsFactory;

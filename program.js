@@ -4,24 +4,20 @@ var Program = function (instrs, labels) {
     var labels = labels ? new SymbolTable(labels) : new SymbolTable(),
         instructions = instrs,
         size = instrs.length,
-        context = {
-            pc: 0,
-            vars: new SymbolTable()
-        },
+        context = new ProgramContext(),
         callParams = new SymbolTable(),
         ret = new SymbolTable();
 
     this.fetch = function () {
-        if (context.pc < size) {
-            var retInstr = instructions[context.pc];
-            context.pc++;
-            return retInstr;
+        var pc = context.getPC();
+        if (pc < size) {
+            return instructions[pc];
         }
         return -1;
     };
 
     this.var = function (k, v) {
-        return context.vars.sym(k, v);
+        return context.var(k, v);
     };
 
     this.label = function (k, v) {
@@ -44,12 +40,16 @@ var Program = function (instrs, labels) {
         return ret.sym(k);
     };
     
-    this.setReturn = this.clearReturn = function (returnContext) {
-        ret.setTable(returnContext);
+    this.setReturn = function (returnContext) {
+        ret = new SymbolTable(returnContext);
+    };
+        
+    this.clearReturn = function () {
+        ret = new SymbolTable();
     }
     
     this.jump = function (lbl) {
-        context.pc = labels.sym(lbl);
+        context.setPC(labels.sym(lbl));
     };
     
     this.getContext = function () {
