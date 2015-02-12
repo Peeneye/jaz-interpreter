@@ -1,11 +1,10 @@
 var Stack = require('./stack'),
-    JazDefsFactory = require('./jvm-defs'),
     StateMachine = require('./state-machine'),
     JVMStates = require('./jvm-states');
 
 var JVMEngine = function (program, definitions) {
     this.program = program;
-    this.definitions = JazDefsFactory.loadDefinitions(this);
+    this.definitions = definitions;
     
     var stack = new Stack(),
         frames = new Stack(),
@@ -19,6 +18,7 @@ var JVMEngine = function (program, definitions) {
     
     this.getState = stateMachine.getState;
     this.setState = stateMachine.setState;
+    this.setState(JVMStates.HALTED);
 };
 
 var decode = function (instr) {
@@ -42,20 +42,32 @@ var execute = function (params) {
     
     
     if (this.definitions[lhs]) {
-        this.definitions[lhs](rhs);
+        this.definitions[lhs].call(this, rhs);
     } else {
         throw 'Invalid keyword';
     }
 };
 
 
-
 JVMEngine.prototype.run = function () {
+    this.setState(JVMStates.NORMAL);
     var instr = this.program.fetch();
     while (instr !== -1 && this.getState() !== JVMStates.HALTED) {
         var params = decode(instr);
         execute.call(this, params);
         instr = this.program.fetch();
+    }
+};
+
+JVMEngine.prototype.setProgram = function (program) {
+    if (this.getState() === JVMStates.HALTED) {
+        this.program = program;
+    }
+};
+
+JVMEngine.prototype.setDefinitions = function (definitions) {
+    if (this.getState() === JVMStates.HALTED) {
+        this.definitions = definitions;
     }
 };
 

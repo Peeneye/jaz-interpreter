@@ -12,10 +12,6 @@ var SymbolTable = function (t) {
     this.getTable = function () {
         return JSON.parse(JSON.stringify(table));
     };
-    
-    this.setTable = function (t) {
-        table = t || {};
-    };
 };
 
 module.exports = SymbolTable;

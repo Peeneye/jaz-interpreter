@@ -191,15 +191,4 @@ var JVMDefs = {
     }
 };
 
-var JVMDefsFactory = {
-    loadDefinitions: function (engineContext) {
-        var retDefs = {};
-        for (var def in JVMDefs) {
-            retDefs[def] = JVMDefs[def].bind(engineContext);
-        }
-        
-        return retDefs;
-    }
-};
-
-module.exports = JVMDefsFactory;
+module.exports = JVMDefs;
