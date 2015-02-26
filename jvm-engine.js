@@ -59,16 +59,4 @@ JVMEngine.prototype.run = function () {
     }
 };
 
-JVMEngine.prototype.setProgram = function (program) {
-    if (this.getState() === JVMStates.HALTED) {
-        this.program = program;
-    }
-};
-
-JVMEngine.prototype.setDefinitions = function (definitions) {
-    if (this.getState() === JVMStates.HALTED) {
-        this.definitions = definitions;
-    }
-};
-
 module.exports = JVMEngine;

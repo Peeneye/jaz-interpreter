@@ -56,8 +56,8 @@ var Program = function (instrs, labels) {
         return context;
     };
     
-    this.setContext = function (c) {
-        context = c;
+    this.setContext = function (ctx) {
+        context = ctx;
     };
 };
 
